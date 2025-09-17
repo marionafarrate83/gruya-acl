@@ -16,10 +16,7 @@ const visitorRoutes = require('./routes/visitors');
 const app = express();
 
 // Conectar a MongoDB
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+mongoose.connect(process.env.MONGODB_URI)
 .then(() => console.log('Conectado a MongoDB'))
 .catch(err => console.log('Error conectando a MongoDB:', err));
 
@@ -52,6 +49,7 @@ app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
 app.use('/visitors', visitorRoutes);
 
+/*
 // Ruta principal
 app.get('/', (req, res) => {
   if (req.session.user) {
@@ -76,6 +74,7 @@ app.get('/auth/logout', (req, res) => {
   req.session.destroy();
   res.redirect('/');
 });
+*/
 
 // Iniciar servidor
 const PORT = process.env.PORT;
