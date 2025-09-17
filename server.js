@@ -17,9 +17,8 @@ const app = express();
 
 // Conectar a MongoDB
 mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  bufferCommands: false
+  //useNewUrlParser: true,
+  //useUnifiedTopology: true
 })
 .then(() => console.log('Conectado a MongoDB'))
 .catch(err => console.log('Error conectando a MongoDB:', err));
@@ -40,12 +39,11 @@ app.use(session({
 }));
 
 // Middleware para pasar user a las vistas
-// Middleware para variables globales en vistas
 app.use((req, res, next) => {
   res.locals.error = null;
   res.locals.errors = null;
   res.locals.formData = null;
-  res.locals.user = req.session.user || null;
+  res.locals.user = req.session.user;
   next();
 });
 
