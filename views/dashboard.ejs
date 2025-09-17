@@ -1,0 +1,28 @@
+<%- include('partials/header', { title: 'Dashboard', user: user }) %>
+<div class="row">
+    <div class="col-md-12">
+        <div class="jumbotron">
+            <h1 class="display-4">Bienvenido, <%= user.residenceNumber %></h1>
+            <p class="lead">Sistema de control de acceso para condominios</p>
+            <hr class="my-4">
+            <p>Tu rol actual: <span class="badge bg-info"><%= user.role %></span></p>
+            
+            <% if (user.role === 'administrador') { %>
+                <p>Como administrador, puedes gestionar usuarios y ver todos los visitantes.</p>
+                <a class="btn btn-primary btn-lg" href="/users" role="button">Gestionar Usuarios</a>
+            <% } %>
+            
+            <% if (user.role === 'guardia') { %>
+                <p>Como guardia, puedes ver la lista de visitantes del día.</p>
+                <a class="btn btn-primary btn-lg" href="/visitors" role="button">Ver Visitantes Hoy</a>
+            <% } %>
+            
+            <% if (user.role === 'residente') { %>
+                <p>Como residente, puedes registrar visitantes y ver tu historial.</p>
+                <a class="btn btn-primary btn-lg mr-2" href="/visitors/create" role="button">Registrar Visitante</a>
+                <a class="btn btn-secondary btn-lg" href="/visitors/history" role="button">Ver Historial</a>
+            <% } %>
+        </div>
+    </div>
+</div>
+<%- include('partials/footer') %>

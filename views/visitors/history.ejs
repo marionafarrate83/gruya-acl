@@ -1,0 +1,61 @@
+<%- include('../partials/header', { title: 'Mi Historial de Visitantes', user: user }) %>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Mi Historial de Visitantes</h2>
+    <a href="/visitors/create" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Nuevo Visitante
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <% if (visitors.length === 0) { %>
+            <div class="alert alert-info">
+                No has registrado visitantes aún.
+                <a href="/visitors/create" class="alert-link">Registrar primer visitante</a>
+            </div>
+        <% } else { %>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID Visita</th>
+                            <th>Nombre Visitante</th>
+                            <th>Fecha Visita</th>
+                            <th>Hora</th>
+                            <th>Motivo</th>
+                            <th>Teléfono</th>
+                            <th colspan="2">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% visitors.forEach(visitor => { %>
+                            <tr>
+                                <td><code><%= visitor.visitId %></code></td>
+                                <td><%= visitor.visitorName %></td>
+                                <td><%= visitor.visitDate.toISOString().replace('T00:00:00.000Z', '') %></td>
+                                <td><%= visitor.visitTime %></td>
+                                <td><%= visitor.visitReason %></td>
+                                <td><%= visitor.visitorPhone %></td>
+                                <td>
+                                    <a href="/visitors/<%= visitor._id %>/qr" 
+                                           class="btn btn-sm btn-info"
+                                           title="Ver QR">
+                                            <i class="fas fa-qrcode"></i> QR
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="/visitors/share/<%= visitor._id %>/whatsapp" 
+                                       class="btn btn-sm btn-success whatsapp-btn"
+                                       target="_blank">
+                                        <i class="fab fa-whatsapp"></i> WhatsApp
+                                    </a>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        <% } %>
+    </div>
+</div>
+<%- include('../partials/footer') %>

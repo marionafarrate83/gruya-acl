@@ -1,0 +1,35 @@
+<%- include('../partials/header', { title: 'Visitante Registrado', user: user }) %>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="text-center">¡Visitante Registrado Exitosamente!</h4>
+            </div>
+            <div class="card-body text-center">
+                <div class="alert alert-success">
+                    <h5>ID de Visita: <code><%= visitor.visitId %></code></h5>
+                    <p>Nombre: <strong><%= visitor.visitorName %></strong></p>
+                    <p>Fecha: <strong><%= visitor.visitDate.toLocaleDateString('es-ES') %> <%= visitor.visitTime %></strong></p>
+                </div>
+                
+                <div class="qr-code mb-4">
+                    <img src="<%= qrCodeData %>" alt="Código QR de la visita" class="img-fluid">
+                </div>
+                
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="/visitors/share/<%= visitor._id %>/whatsapp" 
+                       class="btn btn-success whatsapp-btn" target="_blank">
+                        <i class="fab fa-whatsapp"></i> Enviar por WhatsApp
+                    </a>
+                    <a href="/visitors/create" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Nuevo Visitante
+                    </a>
+                    <a href="/visitors/history" class="btn btn-secondary">
+                        <i class="fas fa-history"></i> Ver Historial
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<%- include('../partials/footer') %>

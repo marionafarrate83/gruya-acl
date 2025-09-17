@@ -1,0 +1,17 @@
+<%- include('partials/header', { title: 'Error', user: user || null }) %>
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h4 class="text-center">Error</h4>
+            </div>
+            <div class="card-body text-center">
+                <div class="alert alert-danger">
+                    <h5><%= message %></h5>
+                </div>
+                <a href="/dashboard" class="btn btn-primary">Volver al Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+<%- include('partials/footer') %>

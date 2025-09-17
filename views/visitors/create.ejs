@@ -1,0 +1,81 @@
+<%- include('../partials/header', { title: 'Registrar Visitante', user: user }) %>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="text-center">Registrar Nuevo Visitante</h4>
+            </div>
+            <div class="card-body">
+                <% if (error) { %>
+                    <div class="alert alert-danger">
+                        <%= error %>
+                    </div>
+                <% } %>
+                
+                <form action="/visitors/create" method="POST">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="visitorName">Nombre del Visitante</label>
+                                <input type="text" class="form-control" id="visitorName" name="visitorName" 
+                                       value="<%= formData ? formData.visitorName : '' %>" required>
+                                <% if (errors && errors.find(e => e.path === 'visitorName')) { %>
+                                    <small class="text-danger"><%= errors.find(e => e.path === 'visitorName').msg %></small>
+                                <% } %>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="visitorPhone">Teléfono del Visitante</label>
+                                <input type="tel" class="form-control" id="visitorPhone" name="visitorPhone" 
+                                       value="<%= formData ? formData.visitorPhone : '' %>" required>
+                                <% if (errors && errors.find(e => e.path === 'visitorPhone')) { %>
+                                    <small class="text-danger"><%= errors.find(e => e.path === 'visitorPhone').msg %></small>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="visitDate">Fecha de Visita</label>
+                                <input type="date" class="form-control" id="visitDate" name="visitDate" 
+                                       value="<%= formData ? formData.visitDate : '' %>" required>
+                                <% if (errors && errors.find(e => e.path === 'visitDate')) { %>
+                                    <small class="text-danger"><%= errors.find(e => e.path === 'visitDate').msg %></small>
+                                <% } %>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="visitTime">Hora de Visita</label>
+                                <input type="time" class="form-control" id="visitTime" name="visitTime" 
+                                       value="<%= formData ? formData.visitTime : '' %>" required>
+                                <% if (errors && errors.find(e => e.path === 'visitTime')) { %>
+                                    <small class="text-danger"><%= errors.find(e => e.path === 'visitTime').msg %></small>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="visitReason">Motivo de Visita</label>
+                        <textarea class="form-control" id="visitReason" name="visitReason" rows="3" required><%= formData ? formData.visitReason : '' %></textarea>
+                        <% if (errors && errors.find(e => e.path === 'visitReason')) { %>
+                            <small class="text-danger"><%= errors.find(e => e.path === 'visitReason').msg %></small>
+                        <% } %>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="/visitors/history" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary">Registrar Visitante</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<%- include('../partials/footer') %>

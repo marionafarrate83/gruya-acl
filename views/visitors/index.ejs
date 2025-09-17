@@ -1,0 +1,45 @@
+<%- include('../partials/header', { title: 'Visitantes de Hoy', user: user }) %>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Visitantes del Día: <%= currentDate.toISOString().replace('T00:00:00.000Z', '') %></h2>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <% if (visitors.length === 0) { %>
+            <div class="alert alert-info">
+                No hay visitantes registrados para hoy.
+            </div>
+        <% } else { %>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID Visita</th>
+                            <th>Nombre Visitante</th>
+                            <th>Residencia</th>
+                            <th>Hora Visita</th>
+                            <th>Motivo</th>
+                            <th>Teléfono</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% visitors.forEach(visitor => { %>
+                            <tr>
+                                <td><code><%= visitor.visitId %></code></td>
+                                <td><%= visitor.visitorName %></td>
+                                <td><%= visitor.residentId.residenceNumber %></td>
+                                <td>
+                                    <%= visitor.visitDate.toISOString().replace('T00:00:00.000Z', '') %> 
+                                    <%= visitor.visitTime %>
+                                </td>
+                                <td><%= visitor.visitReason %></td>
+                                <td><%= visitor.visitorPhone %></td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        <% } %>
+    </div>
+</div>
+<%- include('../partials/footer') %>
