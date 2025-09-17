@@ -33,10 +33,10 @@ app.use(express.json());
 
 // Session middleware
 app.use(session({
-  secret: process.env.JWT_SECRET || 'secret',
+  secret: process.env.JWT_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false } // Cambiar a true en producción con HTTPS
+  cookie: { secure: true } // Cambiar a true en producción con HTTPS
 }));
 
 // Middleware para pasar user a las vistas
@@ -80,7 +80,7 @@ app.get('/auth/logout', (req, res) => {
 });
 
 // Iniciar servidor
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Servidor ejecutándose en puerto ${PORT}`);
 });
