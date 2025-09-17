@@ -3,6 +3,10 @@ const mongoose = require('mongoose');
 const path = require('path');
 const dotenv = require('dotenv');
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
+const helmet = require('helmet');
+const compression = require('compression');
+const rateLimit = require('express-rate-limit');
 
 // Cargar variables de entorno
 dotenv.config();
@@ -31,16 +35,28 @@ app.use(express.json());
 app.use(session({
   secret: process.env.JWT_SECRET,
   resave: false,
-  saveUninitialized: true,
-  cookie: { secure: true }
+  saveUninitialized: false,
+  store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
+  cookie: { maxAge: 1000 * 60 * 60 * 24 } // 1 día
 }))
 
 // Middleware para pasar user a las vistas
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
   res.locals.error = null;
   res.locals.errors = null;
   res.locals.formData = null;
-  res.locals.user = req.session.user;
+  // Cargar usuario si está autenticado
+  if (req.session.userId) {
+    try {
+      const user = await req.db.collection('users').findOne({ _id: new ObjectId(req.session.userId) });
+      res.locals.user = user || null;
+    } catch (err) {
+      console.error('Error al obtener el usuario:', err);
+      res.locals.user = null;
+    }
+  } else {
+    res.locals.user = null;
+  }  
   next();
 });
 
