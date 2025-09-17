@@ -3,6 +3,30 @@ const User = require('../models/User');
 const { body, validationResult } = require('express-validator');
 const router = express.Router();
 
+router.get('/', (req, res) => {
+  if (req.session.user) {
+    return res.redirect('/dashboard');
+  }
+  res.render('auth/login', { 
+    title: 'Iniciar Sesión',
+    error: null, // Asegurar que error esté definido
+    formData: null 
+  });
+});
+
+
+router.get('/dashboard', (req, res) => {
+  console.log("buscar sesion de usuario")
+  console.log(req.session)
+  if (!req.session) {
+    return res.redirect('/login');
+  }
+  res.render('dashboard', { 
+    title: 'Dashboard',
+    user: req.session.user 
+  });
+});
+
 // Página de login
 router.get('/login', (req, res) => {
   if (req.session.user) {
@@ -120,6 +144,11 @@ router.post('/register', [
       user: null 
     });
   }
+});
+
+router.get('/logout', (req, res) => {
+  req.session.destroy();
+  res.redirect('/');
 });
 
 module.exports = router;

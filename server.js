@@ -45,36 +45,9 @@ app.use((req, res, next) => {
 });
 
 // Rutas
-app.use('/auth', authRoutes);
+app.use('/', authRoutes);
 app.use('/users', userRoutes);
 app.use('/visitors', visitorRoutes);
-
-/*
-// Ruta principal
-app.get('/', (req, res) => {
-  if (req.session.user) {
-    return res.redirect('/dashboard');
-  }
-  res.render('auth/login', { title: 'Iniciar Sesión' });
-});
-
-// Dashboard
-app.get('/dashboard', (req, res) => {
-  if (!req.session.user) {
-    return res.redirect('/auth/login');
-  }
-  res.render('dashboard', { 
-    title: 'Dashboard',
-    user: req.session.user 
-  });
-});
-
-// Logout
-app.get('/auth/logout', (req, res) => {
-  req.session.destroy();
-  res.redirect('/');
-});
-*/
 
 // Iniciar servidor
 const PORT = process.env.PORT;
