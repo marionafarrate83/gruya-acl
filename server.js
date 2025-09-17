@@ -16,9 +16,10 @@ const visitorRoutes = require('./routes/visitors');
 const app = express();
 
 // Conectar a MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/condominio_access', {
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
+  bufferCommands: false
 })
 .then(() => console.log('Conectado a MongoDB'))
 .catch(err => console.log('Error conectando a MongoDB:', err));
