@@ -34,8 +34,8 @@ app.use(express.json());
 app.use(session({
   secret: process.env.JWT_SECRET,
   resave: false,
-  saveUninitialized: false,
-  cookie: { secure: true } // Cambiar a true en producción con HTTPS
+  saveUninitialized: false//,
+  //cookie: { secure: true } // Cambiar a true en producción con HTTPS
 }));
 
 // Middleware para pasar user a las vistas
