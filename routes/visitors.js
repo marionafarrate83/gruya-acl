@@ -4,6 +4,8 @@ const Visitor = require('../models/Visitor');
 const QRCode = require('qrcode');
 const { body, validationResult } = require('express-validator');
 const router = express.Router();
+const multer = require('multer');
+const cloudinary = require('../config/cloudinary');
 
 // Vista de visitantes del día (para guardias y administradores)
 router.get('/', protect, guard, async (req, res) => {
@@ -276,6 +278,207 @@ router.post('/api/:id/visit', protect, guard, async (req, res) => {
     }
 });
 
+// Configurar multer para memoria (no guardar archivos en disco)
+const storage = multer.memoryStorage();
+const upload = multer({ 
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB límite
+  }
+});
 
+// API: Subir fotos para un visitante
+router.post('/api/:id/upload-photos', protect, guard, upload.array('photos', 2), async (req, res) => {
+  try {
+    const visitor = await Visitor.findById(req.params.id);
+    
+    if (!visitor) {
+      return res.status(404).json({ error: 'Visitante no encontrado' });
+    }
+
+    // Subir fotos a Cloudinary
+    const uploadPromises = req.files.map(file => {
+      return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'condominio/visitors',
+            public_id: `visit_${visitor.visitId}_${Date.now()}`,
+            transformation: [
+              { width: 800, height: 600, crop: 'limit' },
+              { quality: 'auto' },
+              { format: 'jpg' }
+            ]
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+
+        stream.end(file.buffer);
+      });
+    });
+
+    const results = await Promise.all(uploadPromises);
+    
+    // Guardar URLs en la base de datos
+    visitor.photos = results.map(result => ({
+      url: result.secure_url,
+      public_id: result.public_id
+    }));
+    
+    visitor.photosUploaded = true;
+    await visitor.save();
+
+    res.json({
+      success: true,
+      message: 'Fotos subidas correctamente',
+      photos: visitor.photos
+    });
+
+  } catch (error) {
+    console.error('Error subiendo fotos:', error);
+    res.status(500).json({ error: 'Error subiendo fotos' });
+  }
+});
+
+// API: Obtener fotos de un visitante
+router.get('/api/:id/photos', protect, guard, async (req, res) => {
+  try {
+    const visitor = await Visitor.findById(req.params.id);
+    
+    if (!visitor) {
+      return res.status(404).json({ error: 'Visitante no encontrado' });
+    }
+
+    res.json({
+      photos: visitor.photos,
+      photosUploaded: visitor.photosUploaded
+    });
+
+  } catch (error) {
+    console.error('Error obteniendo fotos:', error);
+    res.status(500).json({ error: 'Error obteniendo fotos' });
+  }
+});
+
+// Ruta para administración de visitantes
+router.get('/admin', protect, admin, async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        // Construir filtros
+        let filter = {};
+        
+        // Filtro de búsqueda general
+        if (req.query['search-term']) {
+            const searchTerm = req.query['search-term'];
+            filter.$or = [
+                { visitorName: { $regex: searchTerm, $options: 'i' } },
+                { visitId: { $regex: searchTerm, $options: 'i' } },
+                { visitReason: { $regex: searchTerm, $options: 'i' } },
+                { 'residentId.residenceNumber': { $regex: searchTerm, $options: 'i' } }
+            ];
+        }
+
+        // Filtro por fecha
+        if (req.query['date-from'] || req.query['date-to']) {
+            filter.visitDate = {};
+            if (req.query['date-from']) {
+                filter.visitDate.$gte = new Date(req.query['date-from']);
+            }
+            if (req.query['date-to']) {
+                const toDate = new Date(req.query['date-to']);
+                toDate.setHours(23, 59, 59, 999);
+                filter.visitDate.$lte = toDate;
+            }
+        }
+
+        // Filtro por estado de visita
+        if (req.query['visit-status'] === 'visited') {
+            filter.visitedAt = { $exists: true, $ne: null };
+        } else if (req.query['visit-status'] === 'not-visited') {
+            filter.visitedAt = { $exists: false };
+        }
+
+        // Filtro por fotos
+        if (req.query['photos-status'] === 'with-photos') {
+            filter.photosUploaded = true;
+        } else if (req.query['photos-status'] === 'without-photos') {
+            filter.photosUploaded = false;
+        }
+
+        const total = await Visitor.countDocuments(filter);
+        const visitors = await Visitor.find(filter)
+            .populate('residentId', 'residenceNumber email phone')
+            .sort({ visitDate: -1, createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const totalPages = Math.ceil(total / limit);
+
+        res.render('visitors/admin', {
+            title: 'Administrar Visitantes',
+            user: req.user,
+            visitors,
+            currentPage: page,
+            totalPages,
+            total,
+            queryString: new URLSearchParams(req.query).toString()
+        });
+
+    } catch (error) {
+        console.error('Error en administración de visitantes:', error);
+        res.status(500).render('error', { 
+            message: 'Error del servidor',
+            user: req.user 
+        });
+    }
+});
+
+// API: Obtener detalles completos para admin
+router.get('/api/:id/admin', protect, admin, async (req, res) => {
+    try {
+        const visitor = await Visitor.findById(req.params.id)
+            .populate('residentId', 'residenceNumber email phone');
+
+        if (!visitor) {
+            return res.status(404).json({ error: 'Visitante no encontrado' });
+        }
+
+        res.json(visitor);
+    } catch (error) {
+        console.error('Error obteniendo detalles:', error);
+        res.status(500).json({ error: 'Error del servidor' });
+    }
+});
+
+// API: Eliminar visita
+router.delete('/api/:id', protect, admin, async (req, res) => {
+    try {
+        const visitor = await Visitor.findById(req.params.id);
+        
+        if (!visitor) {
+            return res.status(404).json({ error: 'Visitante no encontrado' });
+        }
+
+        // Eliminar fotos de Cloudinary si existen
+        if (visitor.photosUploaded && visitor.photos.length > 0) {
+            const deletePromises = visitor.photos.map(photo => 
+                cloudinary.uploader.destroy(photo.public_id)
+            );
+            await Promise.all(deletePromises);
+        }
+
+        await Visitor.findByIdAndDelete(req.params.id);
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error eliminando visita:', error);
+        res.status(500).json({ error: 'Error del servidor' });
+    }
+});
 
 module.exports = router;

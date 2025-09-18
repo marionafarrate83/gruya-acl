@@ -1,0 +1,258 @@
+<%- include('../partials/header', { title: 'Administrar Visitantes', user: user }) %>
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="fas fa-users"></i> Administración de Visitantes
+        </h2>
+        <div>
+            <span class="badge bg-info fs-6">
+                Total: <span id="total-count"><%= visitors.length %></span> visitas
+            </span>
+        </div>
+    </div>
+
+    <!-- Panel de Filtros -->
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-filter"></i> Filtros de Búsqueda
+            </h5>
+        </div>
+        <div class="card-body">
+            <form id="filter-form" class="row g-3">
+                <div class="col-md-3">
+                    <label for="search-term" class="form-label">Búsqueda general</label>
+                    <input type="text" class="form-control" id="search-term" placeholder="Nombre, ID, residencia...">
+                </div>
+                
+                <div class="col-md-2">
+                    <label for="date-from" class="form-label">Fecha desde</label>
+                    <input type="date" class="form-control" id="date-from">
+                </div>
+                
+                <div class="col-md-2">
+                    <label for="date-to" class="form-label">Fecha hasta</label>
+                    <input type="date" class="form-control" id="date-to">
+                </div>
+                
+                <div class="col-md-2">
+                    <label for="visit-status" class="form-label">Estado</label>
+                    <select class="form-select" id="visit-status">
+                        <option value="">Todos</option>
+                        <option value="visited">Visitados</option>
+                        <option value="not-visited">No visitados</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-2">
+                    <label for="photos-status" class="form-label">Fotos</label>
+                    <select class="form-select" id="photos-status">
+                        <option value="">Todos</option>
+                        <option value="with-photos">Con fotos</option>
+                        <option value="without-photos">Sin fotos</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-1">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-grid">
+                        <button type="button" class="btn btn-primary" onclick="applyFilters()">
+                            <i class="fas fa-search"></i> Filtrar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="d-grid">
+                        <button type="button" class="btn btn-outline-secondary" id="clear-filters">
+                            <i class="fas fa-times"></i> Limpiar
+                        </button>
+                    </div>
+                </div>
+                    
+                <div class="col-12">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="show-photos" onchange="togglePhotoPreviews()">
+                        <label class="form-check-label" for="show-photos">
+                            Mostrar miniaturas de fotos en la tabla
+                        </label>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tabla de Visitantes -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped" id="visitors-table">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID Visita</th>
+                            <th>Nombre Visitante</th>
+                            <th>Residencia</th>
+                            <th>Fecha Visita</th>
+                            <th>Hora</th>
+                            <th>Teléfono</th>
+                            <th>Motivo</th>
+                            <th>Estado</th>
+                            <th>Fotos</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (visitors.length === 0) { %>
+                            <tr>
+                                <td colspan="10" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="fas fa-inbox fa-3x mb-3"></i>
+                                        <p>No hay visitantes registrados</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% } else { %>
+                            <% visitors.forEach(visitor => { %>
+                                <tr data-visitor-id="<%= visitor._id %>" 
+                                    data-visit-date="<%= visitor.visitDate.toISOString().split('T')[0] %>"
+                                    data-visited="<%= !!visitor.visitedAt %>"
+                                    data-has-photos="<%= visitor.photosUploaded %>">
+                                    <td><code><%= visitor.visitId %></code></td>
+                                    <td><%= visitor.visitorName %></td>
+                                    <td><%= visitor.residentId.residenceNumber %></td>
+                                    <td><%= visitor.visitDate.toLocaleDateString('es-ES') %></td>
+                                    <td><%= visitor.visitTime %></td>
+                                    <td><%= visitor.visitorPhone %></td>
+                                    <td class="truncate-text" title="<%= visitor.visitReason %>">
+                                        <%= visitor.visitReason.length > 30 ? visitor.visitReason.substring(0, 30) + '...' : visitor.visitReason %>
+                                    </td>
+                                    <td>
+                                        <% if (visitor.visitedAt) { %>
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check"></i> Visitado
+                                            </span>
+                                            <br>
+                                            <small class="text-muted">
+                                                <%= new Date(visitor.visitedAt).toLocaleDateString('es-ES') %>
+                                            </small>
+                                        <% } else { %>
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-clock"></i> Pendiente
+                                            </span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <% if (visitor.photosUploaded && visitor.photos && visitor.photos.length > 0) { %>
+                                            <div class="photo-thumbnails">
+                                                <% visitor.photos.slice(0, 2).forEach(photo => { %>
+                                                    <img src="<%= photo.url %>" 
+                                                         class="img-thumbnail me-1" 
+                                                         style="width: 40px; height: 40px; object-fit: cover;"
+                                                         onerror="this.style.display='none'">
+                                                <% }) %>
+                                                <% if (visitor.photos.length > 2) { %>
+                                                    <span class="badge bg-info">+<%= visitor.photos.length - 2 %></span>
+                                                <% } %>
+                                            </div>
+                                        <% } else { %>
+                                            <span class="text-muted">Sin fotos</span>
+                                        <% } %>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <% if (visitor.photosUploaded && visitor.photos && visitor.photos.length > 0) { %>
+                                                <button class="btn btn-info" 
+                                                        onclick="viewPhotos('<%= visitor._id %>')"
+                                                        title="Ver fotos">
+                                                    <i class="fas fa-images"></i>
+                                                </button>
+                                            <% } %>
+                                            <button class="btn btn-secondary" 
+                                                    onclick="viewDetails('<%= visitor._id %>')"
+                                                    title="Ver detalles">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <% if (user.role === 'administrador') { %>
+                                                <button class="btn btn-danger" 
+                                                        onclick="deleteVisit('<%= visitor._id %>')"
+                                                        title="Eliminar visita">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            <% } %>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginación -->
+            <% if (totalPages > 1) { %>
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                            <a class="page-link" href="?page=<%= currentPage - 1 %>&<%= queryString %>">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        
+                        <% for (let i = 1; i <= totalPages; i++) { %>
+                            <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                                <a class="page-link" href="?page=<%= i %>&<%= queryString %>"><%= i %></a>
+                            </li>
+                        <% } %>
+
+                        <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                            <a class="page-link" href="?page=<%= currentPage + 1 %>&<%= queryString %>">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Ver Fotos -->
+<div class="modal fade" id="photosModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Fotos del Visitante</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="photos-container" class="row">
+                    <!-- Las fotos se cargarán aquí -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Detalles -->
+<div class="modal fade" id="detailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalles de la Visita</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="details-container">
+                <!-- Los detalles se cargarán aquí -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/js/admin-visitors.js"></script>
+<%- include('../partials/footer') %>

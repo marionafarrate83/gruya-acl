@@ -37,6 +37,18 @@ const visitorSchema = new mongoose.Schema({
   visitedAt: {
         type: Date,
         default: null
+  },
+  photos: [{
+    url: String,
+    public_id: String,
+    uploadedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  photosUploaded: {
+    type: Boolean,
+    default: false
   }
 });
 

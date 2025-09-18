@@ -28,3 +28,70 @@
         margin-bottom: 1rem;
     }
 }
+
+.photo-preview {
+    min-height: 100px;
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+}
+
+.photo-preview img {
+    max-width: 100%;
+    max-height: 100px;
+}
+
+/* Estilos para Alertify */
+.alertify .ajs-header {
+    background-color: #2c3e50;
+    color: white;
+}
+
+.alertify .ajs-body .ajs-content {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+/* Estilos para administración */
+.truncate-text {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.photo-thumbnails {
+    display: flex;
+    gap: 2px;
+}
+
+.photo-thumbnails img {
+    border-radius: 3px;
+    transition: transform 0.2s;
+}
+
+.photo-thumbnails img:hover {
+    transform: scale(1.1);
+    z-index: 10;
+}
+
+/* Paginación */
+.pagination .page-item.active .page-link {
+    background-color: #2c3e50;
+    border-color: #2c3e50;
+}
+
+/* Tabla responsive */
+@media (max-width: 768px) {
+    .table-responsive {
+        font-size: 0.8rem;
+    }
+    
+    .btn-group-sm .btn {
+        padding: 0.15rem 0.3rem;
+        font-size: 0.7rem;
+    }
+}
