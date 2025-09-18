@@ -1,0 +1,79 @@
+<%- include('../partials/header', { title: 'Resultado de Carga Masiva', user: user }) %>
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-check-circle"></i> Resultado de Carga Masiva
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="card text-center bg-light">
+                            <div class="card-body">
+                                <h3 class="text-success"><%= results.success %></h3>
+                                <p class="mb-0">Usuarios Creados</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-light">
+                            <div class="card-body">
+                                <h3 class="text-warning"><%= results.duplicates %></h3>
+                                <p class="mb-0">Duplicados</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-light">
+                            <div class="card-body">
+                                <h3 class="text-danger"><%= results.skipped %></h3>
+                                <p class="mb-0">Omitidos</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card text-center bg-light">
+                            <div class="card-body">
+                                <h3 class="text-info"><%= results.total %></h3>
+                                <p class="mb-0">Total Procesados</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <% if (results.errors.length > 0) { %>
+                    <div class="alert alert-warning">
+                        <h5><i class="fas fa-exclamation-triangle"></i> Errores y Advertencias</h5>
+                        <div style="max-height: 300px; overflow-y: auto;">
+                            <ul class="mb-0">
+                                <% results.errors.forEach(error => { %>
+                                    <li><small><%= error %></small></li>
+                                <% }) %>
+                            </ul>
+                        </div>
+                    </div>
+                <% } %>
+
+                <% if (results.success > 0) { %>
+                    <div class="alert alert-success">
+                        <h5><i class="fas fa-check"></i> ¡Carga completada con éxito!</h5>
+                        <p>Se han creado <%= results.success %> usuarios correctamente.</p>
+                    </div>
+                <% } %>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="/users/bulk-upload" class="btn btn-outline-primary">
+                        <i class="fas fa-plus"></i> Nueva Carga
+                    </a>
+                    <a href="/users" class="btn btn-primary">
+                        <i class="fas fa-users"></i> Ver Usuarios
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

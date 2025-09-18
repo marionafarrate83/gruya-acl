@@ -3,6 +3,10 @@ const { protect, admin } = require('../middleware/auth');
 const User = require('../models/User');
 const { body, validationResult } = require('express-validator'); // Importar body y validationResult
 const router = express.Router();
+const upload = require('../middleware/upload');
+const FileProcessor = require('../utils/fileProcessor');
+const fs = require('fs');
+const path = require('path');
 
 // Rutas para usuarios (solo administradores)
 router.get('/', protect, admin, async (req, res) => {
@@ -154,6 +158,111 @@ router.post('/delete/:id', protect, admin, async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).render('error', { message: 'Error del servidor' });
+  }
+});
+
+// Ruta para mostrar el formulario de carga masiva
+router.get('/bulk-upload', protect, admin, (req, res) => {
+  res.render('users/bulk-upload', {
+    title: 'Carga Masiva de Usuarios',
+    user: req.user
+  });
+});
+
+// Ruta para descargar plantilla
+router.get('/download-template', protect, admin, (req, res) => {
+  const filePath = path.join(__dirname, '../public/templates/plantilla-residentes.csv');
+  res.download(filePath, 'plantilla-residentes-condominio.csv');
+});
+
+// Ruta para procesar carga masiva
+router.post('/bulk-upload', protect, admin, upload.single('usersFile'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).render('users/bulk-upload', {
+        title: 'Carga Masiva de Usuarios',
+        user: req.user,
+        error: 'Por favor seleccione un archivo'
+      });
+    }
+
+    let rows = [];
+    const fileExtension = path.extname(req.file.originalname).toLowerCase();
+
+    // Procesar según el tipo de archivo
+    if (fileExtension === '.csv') {
+      rows = await FileProcessor.processCSV(req.file.path);
+    } else if (['.xlsx', '.xls'].includes(fileExtension)) {
+      rows = await FileProcessor.processExcel(req.file.path);
+    } else {
+      throw new Error('Formato de archivo no soportado');
+    }
+
+    if (rows.length === 0) {
+      throw new Error('El archivo está vacío o no contiene datos válidos');
+    }
+
+    // Procesar los datos
+    const results = await FileProcessor.processBulkUpload(rows, req.user._id);
+
+    // Limpiar archivo temporal
+    fs.unlinkSync(req.file.path);
+
+    res.render('users/bulk-upload-result', {
+      title: 'Resultado de Carga Masiva',
+      user: req.user,
+      results: results
+    });
+
+  } catch (error) {
+    // Limpiar archivo en caso de error
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+
+    res.status(500).render('users/bulk-upload', {
+      title: 'Carga Masiva de Usuarios',
+      user: req.user,
+      error: `Error procesando archivo: ${error.message}`
+    });
+  }
+});
+
+// API para carga masiva (para AJAX)
+router.post('/api/bulk-upload', protect, admin, upload.single('usersFile'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No se seleccionó ningún archivo' });
+    }
+
+    let rows = [];
+    const fileExtension = path.extname(req.file.originalname).toLowerCase();
+
+    if (fileExtension === '.csv') {
+      rows = await FileProcessor.processCSV(req.file.path);
+    } else if (['.xlsx', '.xls'].includes(fileExtension)) {
+      rows = await FileProcessor.processExcel(req.file.path);
+    }
+
+    const results = await FileProcessor.processBulkUpload(rows, req.user._id);
+
+    // Limpiar archivo temporal
+    fs.unlinkSync(req.file.path);
+
+    res.json({
+      success: true,
+      results: results
+    });
+
+  } catch (error) {
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
   }
 });
 

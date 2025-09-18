@@ -1,0 +1,5 @@
+residenceNumber,email,phone,role,password
+101A,residente1@condominio.com,+1234567890,residente,password123
+102B,residente2@condominio.com,+1234567891,residente,
+201A,guardia1@condominio.com,+1234567892,guardia,guardia123
+301A,admin@condominio.com,+1234567893,administrador,admin123

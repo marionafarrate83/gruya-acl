@@ -1,0 +1,86 @@
+<%- include('../partials/header', { title: 'Carga Masiva de Usuarios', user: user }) %>
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-upload"></i> Carga Masiva de Residentes
+                </h4>
+            </div>
+            <div class="card-body">
+                <% if (error) { %>
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i> <%= error %>
+                    </div>
+                <% } %>
+
+                <div class="alert alert-info">
+                    <h5><i class="fas fa-info-circle"></i> Instrucciones</h5>
+                    <ol class="mb-0">
+                        <li>Descargue la plantilla de ejemplo</li>
+                        <li>Complete los datos de los residentes</li>
+                        <li>Suba el archivo en formato CSV o Excel</li>
+                        <li>Revise los resultados de la carga</li>
+                    </ol>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body text-center">
+                                <h6>Descargar Plantilla</h6>
+                                <a href="/users/download-template" class="btn btn-outline-primary">
+                                    <i class="fas fa-download"></i> Descargar CSV de Ejemplo
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6>Formato Requerido</h6>
+                                <ul class="small mb-0">
+                                    <li><strong>residenceNumber</strong>: Número de residencia (requerido)</li>
+                                    <li><strong>email</strong>: Correo electrónico (requerido)</li>
+                                    <li><strong>phone</strong>: Teléfono (requerido)</li>
+                                    <li><strong>role</strong>: residente/guardia/administrador</li>
+                                    <li><strong>password</strong>: Contraseña (opcional, se genera automáticamente)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <form id="uploadForm" action="/users/bulk-upload" method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="usersFile" class="form-label">Seleccionar Archivo</label>
+                        <input class="form-control" type="file" id="usersFile" name="usersFile" 
+                               accept=".csv,.xlsx,.xls" required>
+                        <div class="form-text">
+                            Formatos aceptados: CSV, Excel (.xlsx, .xls). Tamaño máximo: 10MB
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="/users" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Volver
+                        </a>
+                        <button type="submit" class="btn btn-primary" id="uploadButton">
+                            <i class="fas fa-upload"></i> Iniciar Carga Masiva
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('uploadForm').addEventListener('submit', function(e) {
+    const button = document.getElementById('uploadButton');
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+});
+</script>
+
+<%- include('../partials/footer') %>
