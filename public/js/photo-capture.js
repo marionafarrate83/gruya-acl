@@ -28,7 +28,7 @@ class PhotoCapture {
                 video: { 
                     width: { ideal: 1280 },
                     height: { ideal: 720 },
-                    facingMode: 'user' 
+                    facingMode: 'environment' 
                 } 
             });
             
