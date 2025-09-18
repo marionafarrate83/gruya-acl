@@ -14,7 +14,7 @@ class PDFService {
                 });
 
                 const fileName = `visita_${visitor.visitId}_${Date.now()}.pdf`;
-                const filePath = path.join(__dirname, '../public/temp', fileName);
+                const filePath = path.join(__dirname, '../tmp', fileName);
                 
                 // Crear directorio temp si no existe
                 if (!fs.existsSync(path.dirname(filePath))) {
@@ -48,7 +48,7 @@ class PDFService {
                     resolve({
                         fileName: fileName,
                         filePath: filePath,
-                        publicUrl: `/temp/${fileName}`
+                        publicUrl: `/tmp/${fileName}`
                     });
                 });
 
@@ -215,7 +215,7 @@ class PDFService {
     }
 
     static cleanupOldFiles() {
-        const tempDir = path.join(__dirname, '../public/temp');
+        const tempDir = path.join(__dirname, '../tmp');
         if (fs.existsSync(tempDir)) {
             const files = fs.readdirSync(tempDir);
             const now = Date.now();
