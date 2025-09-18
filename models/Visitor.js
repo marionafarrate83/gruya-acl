@@ -33,6 +33,10 @@ const visitorSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  visitedAt: {
+        type: Date,
+        default: null
   }
 });
 

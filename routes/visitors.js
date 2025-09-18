@@ -158,4 +158,124 @@ router.get('/:id/qr', protect, async (req, res) => {
   }
 });
 
+// Ruta para la página de escaneo
+router.get('/scan', protect, guard, (req, res) => {
+    res.render('visitors/scan', {
+        title: 'Escanear Código QR',
+        user: req.user
+    });
+});
+
+// API: Verificar código QR
+router.post('/api/verify', protect, guard, async (req, res) => {
+    try {
+        console.log("ya estoy en verify")
+        const { visitId } = req.body;
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const visitor = await Visitor.findOne({
+            visitId: visitId.trim(),
+            visitDate: {
+                $gte: today,
+                $lt: tomorrow
+            }
+        }).populate('residentId', 'residenceNumber');
+
+        if (!visitor) {
+            return res.json({
+                success: false,
+                message: 'Código no válido o expirado'
+            });
+        }
+
+        res.json({
+            success: true,
+            visitor: {
+                _id: visitor._id,
+                visitId: visitor.visitId,
+                visitorName: visitor.visitorName,
+                visitDate: visitor.visitDate,
+                visitTime: visitor.visitTime,
+                visitReason: visitor.visitReason,
+                visitorPhone: visitor.visitorPhone,
+                residentId: visitor.residentId,
+                visitedAt: visitor.visitedAt
+            }
+        });
+
+    } catch (error) {
+        console.error('Error verificando código:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error del servidor'
+        });
+    }
+});
+
+// API: Obtener visitantes de hoy
+router.get('/api/today', protect, guard, async (req, res) => {
+    try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const visitors = await Visitor.find({
+            visitDate: {
+                $gte: today,
+                $lt: tomorrow
+            }
+        }).populate('residentId', 'residenceNumber')
+          .sort({ createdAt: -1 });
+
+        res.json(visitors);
+    } catch (error) {
+        console.error('Error obteniendo visitantes:', error);
+        res.status(500).json({ error: 'Error del servidor' });
+    }
+});
+
+// API: Obtener detalles de visitante
+router.get('/api/:id', protect, guard, async (req, res) => {
+    try {
+        const visitor = await Visitor.findById(req.params.id)
+            .populate('residentId', 'residenceNumber email phone');
+
+        if (!visitor) {
+            return res.status(404).json({ error: 'Visitante no encontrado' });
+        }
+
+        res.json(visitor);
+    } catch (error) {
+        console.error('Error obteniendo visitante:', error);
+        res.status(500).json({ error: 'Error del servidor' });
+    }
+});
+
+// API: Marcar como visitado
+router.post('/api/:id/visit', protect, guard, async (req, res) => {
+    try {
+        const visitor = await Visitor.findByIdAndUpdate(
+            req.params.id,
+            { visitedAt: new Date() },
+            { new: true }
+        );
+
+        if (!visitor) {
+            return res.status(404).json({ error: 'Visitante no encontrado' });
+        }
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error marcando como visitado:', error);
+        res.status(500).json({ error: 'Error del servidor' });
+    }
+});
+
+
+
 module.exports = router;

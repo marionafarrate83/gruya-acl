@@ -1,0 +1,30 @@
+/* Estilos para el escáner QR */
+#camera-container {
+    position: relative;
+}
+
+.scan-region-highlight {
+    border: 2px solid #007bff !important;
+    border-radius: 8px;
+}
+
+.qr-scanner video {
+    border-radius: 8px;
+}
+
+/* Mejoras para la tabla de visitantes */
+.table-info {
+    background-color: #d1ecf1 !important;
+}
+
+/* Animación para resultados */
+.alert {
+    transition: all 0.3s ease;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    #camera-container {
+        margin-bottom: 1rem;
+    }
+}
