@@ -482,6 +482,35 @@ router.delete('/api/:id', protect, admin, async (req, res) => {
     }
 });
 
+// API para obtener PDF como base64
+router.get('/api/:id/pdf-data', protect, async (req, res) => {
+    try {
+        const visitor = await Visitor.findById(req.params.id)
+            .populate('residentId', 'residenceNumber email phone');
+
+        if (!visitor) {
+            return res.status(404).json({ error: 'Visitante no encontrado' });
+        }
+
+        if (req.user.role === 'residente' && visitor.residentId._id.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ error: 'No autorizado' });
+        }
+
+        const pdfData = await PDFService.generateVisitPDF(visitor, visitor.residentId);
+        
+        res.json({
+            success: true,
+            data: pdfData.base64,
+            filename: pdfData.filename,
+            mimeType: 'application/pdf'
+        });
+
+    } catch (error) {
+        console.error('Error generando PDF:', error);
+        res.status(500).json({ error: 'Error generando PDF' });
+    }
+});
+
 // Ruta para generar y descargar PDF
 router.get('/:id/pdf', protect, async (req, res) => {
     try {

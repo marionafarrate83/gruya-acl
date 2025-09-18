@@ -1,6 +1,4 @@
 const PDFDocument = require('pdfkit');
-const fs = require('fs');
-const path = require('path');
 const QRCode = require('qrcode');
 
 class PDFService {
@@ -13,48 +11,32 @@ class PDFService {
                     layout: 'portrait'
                 });
 
-                const fileName = `visita_${visitor.visitId}_${Date.now()}.pdf`;
-                const filePath = path.join(__dirname, '../tmp', fileName);
+                // Colectar chunks del PDF en memoria
+                const chunks = [];
                 
-                // Crear directorio temp si no existe
-                if (!fs.existsSync(path.dirname(filePath))) {
-                    fs.mkdirSync(path.dirname(filePath), { recursive: true });
-                }
+                doc.on('data', (chunk) => chunks.push(chunk));
+                doc.on('end', () => {
+                    const pdfBuffer = Buffer.concat(chunks);
+                    const base64 = pdfBuffer.toString('base64');
+                    resolve({
+                        base64: base64,
+                        buffer: pdfBuffer,
+                        filename: `visita_${visitor.visitId}_${new Date().toISOString().split('T')[0]}.pdf`
+                    });
+                });
+                doc.on('error', reject);
 
-                const stream = fs.createWriteStream(filePath);
-                doc.pipe(stream);
-
-                // Generar código QR
-                const qrCodeData = await QRCode.toDataURL(visitor.visitId);
-
-                // Encabezado
+                // Contenido del PDF
                 this.addHeader(doc, visitor);
-
-                // Información de la visita
                 this.addVisitInfo(doc, visitor, resident);
-
-                // Código QR
+                
+                const qrCodeData = await QRCode.toDataURL(visitor.visitId);
                 await this.addQRCode(doc, qrCodeData);
-
-                // Términos y condiciones
+                
                 this.addTermsAndConditions(doc);
-
-                // Pie de página
                 this.addFooter(doc);
 
                 doc.end();
-
-                stream.on('finish', () => {
-                    resolve({
-                        fileName: fileName,
-                        filePath: filePath,
-                        publicUrl: `/tmp/${fileName}`
-                    });
-                });
-
-                stream.on('error', (error) => {
-                    reject(error);
-                });
 
             } catch (error) {
                 reject(error);
@@ -63,7 +45,6 @@ class PDFService {
     }
 
     static addHeader(doc, visitor) {
-        // Logo (puedes agregar un logo real más tarde)
         doc.fontSize(20)
            .font('Helvetica-Bold')
            .fillColor('#2c3e50')
@@ -73,7 +54,6 @@ class PDFService {
            .fillColor('#7f8c8d')
            .text('Sistema de Gestión de Visitantes', 50, 75, { align: 'center' });
 
-        // Línea separadora
         doc.moveTo(50, 100)
            .lineTo(550, 100)
            .strokeColor('#bdc3c7')
@@ -147,11 +127,9 @@ class PDFService {
            .fillColor('#2c3e50')
            .text('CÓDIGO QR DE ACCESO', 50, qrY, { align: 'center' });
 
-        // Convertir data URL a buffer
         const base64Data = qrCodeData.replace(/^data:image\/png;base64,/, "");
         const qrBuffer = Buffer.from(base64Data, 'base64');
 
-        // Agregar imagen QR
         doc.image(qrBuffer, 225, qrY + 20, { 
             width: 150, 
             height: 150,
@@ -214,21 +192,13 @@ class PDFService {
            });
     }
 
-    static cleanupOldFiles() {
-        const tempDir = path.join(__dirname, '../tmp');
-        if (fs.existsSync(tempDir)) {
-            const files = fs.readdirSync(tempDir);
-            const now = Date.now();
-            const oneHour = 60 * 60 * 1000;
-
-            files.forEach(file => {
-                const filePath = path.join(tempDir, file);
-                const stats = fs.statSync(filePath);
-                
-                if (now - stats.mtimeMs > oneHour) {
-                    fs.unlinkSync(filePath);
-                }
-            });
+    // Nuevo método para generar y descargar directamente
+    static async generateAndDownload(visitor, resident) {
+        try {
+            const pdfData = await this.generateVisitPDF(visitor, resident);
+            return pdfData;
+        } catch (error) {
+            throw new Error(`Error generando PDF: ${error.message}`);
         }
     }
 }

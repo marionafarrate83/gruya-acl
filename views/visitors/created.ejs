@@ -13,45 +13,47 @@
                 </div>
                 
                 <div class="qr-code mb-4">
-                    <img src="<%= qrCodeData %>" alt="Código QR de la visita" class="img-fluid">
+                    <img src="<%= qrCodeData %>" alt="Código QR de la visita" class="img-fluid" style="max-width: 200px;">
                 </div>
 
-                <!-- Nuevos botones de PDF -->
+                <!-- Botones de PDF -->
                 <div class="row mb-4">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="d-grid">
-                            <a href="/visitors/<%= visitor._id %>/view-pdf" 
-                               class="btn btn-outline-primary" target="_blank">
+                            <button class="btn btn-outline-primary" 
+                                    onclick="viewVisitPDF('<%= visitor._id %>')">
                                 <i class="fas fa-eye"></i> Ver PDF
-                            </a>
+                            </button>
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <div class="d-grid">
-                            <a href="/visitors/<%= visitor._id %>/pdf" 
-                               class="btn btn-primary">
-                                <i class="fas fa-download"></i> Descargar PDF
-                            </a>
+                            <button class="btn btn-primary" 
+                                    onclick="downloadVisitPDF('<%= visitor._id %>')">
+                                <i class="fas fa-download"></i> Descargar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-grid">
+                            <button class="btn btn-success" 
+                                    onclick="shareVisitPDF('<%= visitor._id %>')">
+                                <i class="fas fa-share-alt"></i> Compartir
+                            </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Botón para compartir -->
-                <div class="mb-4">
-                    <button class="btn btn-success" onclick="shareVisit()">
-                        <i class="fas fa-share-alt"></i> Compartir Visita
-                    </button>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> 
+                    El PDF contiene toda la información de la visita y el código QR para presentar en la entrada.
                 </div>
-                
-                <div class="d-flex justify-content-center gap-3 flex-wrap">
-                    <a href="/visitors/share/<%= visitor._id %>/whatsapp" 
-                       class="btn btn-success whatsapp-btn" target="_blank">
-                        <i class="fab fa-whatsapp"></i> Enviar por WhatsApp
-                    </a>
-                    <a href="/visitors/create" class="btn btn-primary">
+
+                <div class="d-flex justify-content-center gap-3 flex-wrap mt-3">
+                    <a href="/visitors/create" class="btn btn-outline-primary">
                         <i class="fas fa-plus"></i> Nuevo Visitante
                     </a>
-                    <a href="/visitors/history" class="btn btn-secondary">
+                    <a href="/visitors/history" class="btn btn-outline-secondary">
                         <i class="fas fa-history"></i> Ver Historial
                     </a>
                 </div>
@@ -60,37 +62,27 @@
     </div>
 </div>
 
-<script>
-// Función para compartir usando Web Share API
-async function shareVisit() {
-    try {
-        // Descargar PDF primero
-        const pdfUrl = '/visitors/<%= visitor._id %>/pdf';
-        
-        // Para compartir, usamos la URL del PDF
-        if (navigator.share) {
-            await navigator.share({
-                title: 'Pase de Visita - <%= visitor.visitorName %>',
-                text: 'Te comparto el pase de visita para el condominio. ID: <%= visitor.visitId %>',
-                url: window.location.origin + pdfUrl
-            });
-        } else {
-            // Fallback: descargar PDF
-            window.location.href = pdfUrl;
-        }
-    } catch (error) {
-        console.log('Error compartiendo:', error);
-        // Fallback a descarga
-        window.location.href = '/visitors/<%= visitor._id %>/pdf';
-    }
+<!-- Incluir PDF Utils -->
+<script src="/js/pdf-utils.js"></script>
+
+<style>
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    color: white;
 }
 
-// Función para compartir específicamente por WhatsApp
-function shareWhatsApp() {
-    const message = `Te comparto tu pase de visita para el condominio. ID: <%= visitor.visitId %>\n\nPuedes descargar el PDF aquí: ${window.location.origin}/visitors/<%= visitor._id %>/pdf`;
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+.loading-spinner {
+    text-align: center;
 }
-</script>
+</style>
 
 <%- include('../partials/footer') %>

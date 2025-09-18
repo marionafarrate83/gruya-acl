@@ -44,31 +44,22 @@
                                     </a>
                                 </td>
                                 <td>
-                                    <a href="/visitors/share/<%= visitor._id %>/whatsapp" 
-                                       class="btn btn-sm btn-success whatsapp-btn"
-                                       target="_blank">
-                                        <i class="fab fa-whatsapp"></i> WhatsApp
-                                    </a>
-                                </td>
-                                <td>
-                                    <div class="d-flex flex-wrap gap-1">
-                                        <a href="/visitors/<%= visitor._id %>/pdf" 
-                                        class="btn btn-sm btn-outline-primary"
-                                        title="Descargar PDF">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button class="btn btn-outline-primary" 
+                                                onclick="viewVisitPDF('<%= visitor._id %>')"
+                                                title="Ver PDF">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-outline-success" 
+                                                onclick="downloadVisitPDF('<%= visitor._id %>')"
+                                                title="Descargar PDF">
                                             <i class="fas fa-download"></i>
-                                        </a>
-                                        <button class="btn btn-sm btn-success share-btn"
-                                                data-visitor-id="<%= visitor._id %>"
-                                                data-visitor-name="<%= visitor.visitorName %>"
-                                                data-visit-id="<%= visitor.visitId %>"
-                                                title="Compartir">
+                                        </button>
+                                        <button class="btn btn-outline-info" 
+                                                onclick="shareVisitPDF('<%= visitor._id %>')"
+                                                title="Compartir PDF">
                                             <i class="fas fa-share-alt"></i>
                                         </button>
-                                        <a href="/visitors/share/<%= visitor._id %>/whatsapp" 
-                                        class="btn btn-sm btn-info"
-                                        title="WhatsApp">
-                                            <i class="fab fa-whatsapp"></i>
-                                        </a>
                                     </div>
                                 </td>
                             </tr>
@@ -79,4 +70,8 @@
         <% } %>
     </div>
 </div>
+
+<!-- Incluir PDF Utils -->
+<script src="/js/pdf-utils.js"></script>
+
 <%- include('../partials/footer') %>
