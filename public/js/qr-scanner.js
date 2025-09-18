@@ -2,7 +2,7 @@ class QRScanner {
     constructor() {
         this.qrScanner = null;
         this.currentVisitorId = null;
-        this.isScannerAvailable = typeof QRScanner !== 'undefined';
+        this.isScannerAvailable = typeof QrScanner !== 'undefined';
         this.init();
     }
 
@@ -57,7 +57,7 @@ class QRScanner {
 
             // Inicializar escáner directamente sin listar cámaras
             const video = document.getElementById('qr-video');
-            this.qrScanner = new QRScanner(
+            this.qrScanner = new QrScanner(
                 video,
                 result => this.handleScanResult(result),
                 {
@@ -68,7 +68,7 @@ class QRScanner {
                 }
             );
 
-            //QRScanner.start();
+            this.qrScanner.start();
             
             // Cambiar controles de UI
             document.getElementById('start-scan').style.display = 'none';
@@ -91,8 +91,8 @@ class QRScanner {
 
     stopScan() {
         if (this.qrScanner) {
-            //this.qrScanner.stop();
-            //this.qrScanner.destroy();
+            this.qrScanner.stop();
+            this.qrScanner.destroy();
             this.qrScanner = null;
         }
         
@@ -307,4 +307,5 @@ class QRScanner {
 // Inicializar cuando el DOM esté listo
 document.addEventListener('DOMContentLoaded', () => {
     window.qrScanner = new QRScanner();
+    console.log("primero entra aqui")
 });
