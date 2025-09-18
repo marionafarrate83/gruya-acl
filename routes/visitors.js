@@ -6,6 +6,7 @@ const { body, validationResult } = require('express-validator');
 const router = express.Router();
 const multer = require('multer');
 const cloudinary = require('../config/cloudinary');
+const PDFService = require('../services/pdfService');
 
 // Vista de visitantes del día (para guardias y administradores)
 router.get('/', protect, guard, async (req, res) => {
@@ -478,6 +479,87 @@ router.delete('/api/:id', protect, admin, async (req, res) => {
     } catch (error) {
         console.error('Error eliminando visita:', error);
         res.status(500).json({ error: 'Error del servidor' });
+    }
+});
+
+// Ruta para generar y descargar PDF
+router.get('/:id/pdf', protect, async (req, res) => {
+    try {
+        const visitor = await Visitor.findById(req.params.id)
+            .populate('residentId', 'residenceNumber email phone');
+
+        if (!visitor) {
+            return res.status(404).render('error', {
+                message: 'Visitante no encontrado',
+                user: req.user
+            });
+        }
+
+        // Verificar que el usuario tiene permisos
+        if (req.user.role === 'residente' && visitor.residentId._id.toString() !== req.user._id.toString()) {
+            return res.status(403).render('error', {
+                message: 'No tienes permisos para ver este documento',
+                user: req.user
+            });
+        }
+
+        // Generar PDF
+        const pdfInfo = await PDFService.generateVisitPDF(visitor, visitor.residentId);
+
+        // Configurar headers para descarga
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename="visita-${visitor.visitId}.pdf"`);
+
+        // Enviar archivo
+        res.sendFile(pdfInfo.filePath);
+
+        // Limpiar archivos antiguos
+        PDFService.cleanupOldFiles();
+
+    } catch (error) {
+        console.error('Error generando PDF:', error);
+        res.status(500).render('error', {
+            message: 'Error generando el documento PDF',
+            user: req.user
+        });
+    }
+});
+
+// Ruta para ver PDF en el navegador
+router.get('/:id/view-pdf', protect, async (req, res) => {
+    try {
+        const visitor = await Visitor.findById(req.params.id)
+            .populate('residentId', 'residenceNumber email phone');
+
+        if (!visitor) {
+            return res.status(404).render('error', {
+                message: 'Visitante no encontrado',
+                user: req.user
+            });
+        }
+
+        if (req.user.role === 'residente' && visitor.residentId._id.toString() !== req.user._id.toString()) {
+            return res.status(403).render('error', {
+                message: 'No tienes permisos para ver este documento',
+                user: req.user
+            });
+        }
+
+        const pdfInfo = await PDFService.generateVisitPDF(visitor, visitor.residentId);
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `inline; filename="visita-${visitor.visitId}.pdf"`);
+
+        res.sendFile(pdfInfo.filePath);
+
+        PDFService.cleanupOldFiles();
+
+    } catch (error) {
+        console.error('Error mostrando PDF:', error);
+        res.status(500).render('error', {
+            message: 'Error mostrando el documento PDF',
+            user: req.user
+        });
     }
 });
 

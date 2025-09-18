@@ -7,6 +7,9 @@ const MongoStore = require('connect-mongo');
 const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
+const PDFService = require('./services/pdfService');
+
+
 
 // Cargar variables de entorno
 dotenv.config();
@@ -59,6 +62,14 @@ app.use(async (req, res, next) => {
   }  
   next();
 });
+
+// Servir archivos temporales
+app.use('/temp', express.static(path.join(__dirname, 'public/temp')));
+
+// Limpiar archivos temporales cada hora
+setInterval(() => {
+    PDFService.cleanupOldFiles();
+}, 60 * 60 * 1000); // Cada hora
 
 // Rutas
 app.use('/', authRoutes);
