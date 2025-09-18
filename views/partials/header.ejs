@@ -44,15 +44,15 @@
                                 <%= user.email %> (<%= user.role %>)
                             </a>
                             <div class="dropdown-menu">
-                                <a class="dropdown-item" href="/auth/logout">Cerrar Sesión</a>
+                                <a class="dropdown-item" href="/logout">Cerrar Sesión</a>
                             </div>
                         </li>
                     <% } else { %>
                         <li class="nav-item">
-                            <a class="nav-link" href="/auth/login">Iniciar Sesión</a>
+                            <a class="nav-link" href="/login">Iniciar Sesión</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/auth/register">Registrarse</a>
+                            <a class="nav-link" href="/register">Registrarse</a>
                         </li>
                     <% } %>
                 </ul>

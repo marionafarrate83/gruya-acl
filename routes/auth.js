@@ -16,14 +16,12 @@ router.get('/', (req, res) => {
 
 
 router.get('/dashboard', (req, res) => {
-  console.log("buscar sesion de usuario")
-  console.log(req.session)
   if (!req.session) {
     return res.redirect('/login');
   }
   res.render('dashboard', { 
     title: 'Dashboard',
-    user: req.session.user 
+    user: req.session.user
   });
 });
 
