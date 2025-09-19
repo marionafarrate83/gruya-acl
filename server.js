@@ -63,14 +63,6 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// Servir archivos temporales
-app.use('/temp', express.static(path.join(__dirname, 'public/temp')));
-
-// Limpiar archivos temporales cada hora
-setInterval(() => {
-    PDFService.cleanupOldFiles();
-}, 60 * 60 * 1000); // Cada hora
-
 // Rutas
 app.use('/', authRoutes);
 app.use('/users', userRoutes);
