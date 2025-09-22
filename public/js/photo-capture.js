@@ -14,12 +14,15 @@ class PhotoCapture {
     }
 
     bindEvents() {
+        
         document.getElementById('upload-photos').addEventListener('click', () => this.uploadPhotos());
+        
         
         // Cuando se cierra el modal, limpiar fotos
         document.getElementById('photoModal').addEventListener('hidden.bs.modal', () => {
-            this.clearPhotos();
-        });
+        this.clearPhotos();
+        }
+        );
     }
 
     async startCamera() {

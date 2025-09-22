@@ -8,8 +8,7 @@ const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 const PDFService = require('./services/pdfService');
-
-
+const favicon = require('serve-favicon');
 
 // Cargar variables de entorno
 dotenv.config();
@@ -21,6 +20,9 @@ const visitorRoutes = require('./routes/visitors');
 
 // Inicializar aplicación Express
 const app = express();
+
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Conectar a MongoDB
 mongoose.connect(process.env.MONGODB_URI)
