@@ -6,7 +6,6 @@
             <p class="lead">Sistema de control de acceso para condominios</p>
             <hr class="my-4">
             <p>Tu rol actual: <span class="badge bg-info"><%= user.role %></span></p>
-            
             <% if (user.role === 'administrador') { %>
                 <p>Como administrador, puedes gestionar usuarios y ver todos los visitantes.</p>
                 <a class="btn btn-primary btn-lg" href="/users" role="button">Gestionar Usuarios</a>

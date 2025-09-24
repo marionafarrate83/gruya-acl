@@ -17,6 +17,8 @@ dotenv.config();
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
 const visitorRoutes = require('./routes/visitors');
+const statsRoutes = require('./routes/stats');
+
 
 // Inicializar aplicación Express
 const app = express();
@@ -69,6 +71,8 @@ app.use(async (req, res, next) => {
 app.use('/', authRoutes);
 app.use('/users', userRoutes);
 app.use('/visitors', visitorRoutes);
+app.use('/stats', statsRoutes);
+
 
 // Iniciar servidor
 const PORT = process.env.PORT;

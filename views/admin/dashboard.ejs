@@ -1,0 +1,275 @@
+<%- include('../partials/header', { title: 'Dashboard Administrativo', user: user }) %>
+<div class="container-fluid">
+    <!-- Header con estadísticas rápidas -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1>
+                    <i class="fas fa-tachometer-alt"></i> Dashboard Administrativo
+                </h1>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-calendar"></i> Últimos 30 días
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="changeTimeRange(7)">Últimos 7 días</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="changeTimeRange(30)">Últimos 30 días</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="changeTimeRange(90)">Últimos 90 días</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tarjetas de estadísticas generales -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Total Residentes
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-white">
+                                <%= generalStats.totalUsers.toLocaleString() %>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Visitas Hoy
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-white">
+                                <%= generalStats.visitorsToday %>
+                            </div>
+                            <div class="text-xs text-success">
+                                <i class="fas fa-check"></i> <%= generalStats.visitedToday %> completadas
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-day fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Total Visitas
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-white">
+                                <%= generalStats.totalVisitors.toLocaleString() %>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Pendientes Hoy
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-white">
+                                <%= generalStats.pendingToday %>
+                            </div>
+                            <div class="text-xs text-warning">
+                                <i class="fas fa-clock"></i> Por completar
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-hourglass-half fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficas principales -->
+    <div class="row mb-4">
+        <!-- Gráfica de visitas por día -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-chart-line"></i> Visitas por Día (Últimos 30 días)
+                    </h6>
+                    <div class="dropdown no-arrow">
+                        <a class="dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-ellipsis-v fa-sm fa-fw text-gray-400"></i>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right shadow animated--fade-in">
+                            <a class="dropdown-item" href="#" onclick="exportChart('visitsChart', 'visitas-diarias')">Exportar</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area">
+                        <canvas id="visitsChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Distribución por residencia -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-home"></i> Top 10 Residencias con Más Visitas
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="residencesChart" height="250"></canvas>
+                    </div>
+                    <div class="mt-4 text-center small">
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-primary"></i> Completadas
+                        </span>
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-warning"></i> Pendientes
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Segunda fila de gráficas -->
+    <div class="row">
+        <!-- Visitantes por mes -->
+        <div class="col-xl-6 col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-calendar-alt"></i> Visitantes por Mes (Último Año)
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-bar">
+                        <canvas id="monthlyChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Distribución de usuarios -->
+        <div class="col-xl-6 col-lg-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-user-tag"></i> Distribución de Usuarios por Rol
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-pie pt-4 pb-2">
+                        <canvas id="usersChart" height="250"></canvas>
+                    </div>
+                    <div class="mt-4 text-center small">
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-success"></i> Residentes
+                        </span>
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-primary"></i> Guardias
+                        </span>
+                        <span class="mr-2">
+                            <i class="fas fa-circle text-info"></i> Administradores
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de estadísticas rápidas -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-table"></i> Resumen de Actividad Reciente
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="statsTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>Residencia</th>
+                                    <th>Total Visitas</th>
+                                    <th>Completadas</th>
+                                    <th>Pendientes</th>
+                                    <th>% Completado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% visitorsByResidence.forEach(stat => { %>
+                                    <tr>
+                                        <td><strong><%= stat.residence %></strong></td>
+                                        <td><%= stat.total %></td>
+                                        <td class="text-success"><%= stat.visited %></td>
+                                        <td class="text-warning"><%= stat.pending %></td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar bg-success" 
+                                                     style="width: <%= (stat.visited/stat.total)*100 %>%;">
+                                                    <%= ((stat.visited/stat.total)*100).toFixed(1) %>%
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts de gráficas -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/js/charts-config.js"></script>
+
+<!-- Pasar datos desde EJS a JavaScript -->
+<script>
+    // Datos para las gráficas
+    const chartData = {
+        visitorsByDay: <%- JSON.stringify(visitorsByDay) %>,
+        visitorsByResidence: <%- JSON.stringify(visitorsByResidence) %>,
+        monthlyStats: <%- JSON.stringify(monthlyStats) %>,
+        usersByRole: <%- JSON.stringify(usersByRole) %>,
+        generalStats: <%- JSON.stringify(generalStats) %>
+    };
+</script>
+
+<script src="/js/admin-dashboard.js"></script>
+
+<%- include('../partials/footer') %>
