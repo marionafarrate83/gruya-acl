@@ -183,9 +183,11 @@
 </div>
 
 <!-- Por esta otra -->
- <script>var exports = {};</script>
 <script src="/js/qr-scanner.umd.min.js"></script>
-<script src="/js/qr-scanner-worker.min.js"></script>
+<script type="module">
+    import QrScanner from '/js/qr-scanner.min.js';
+    // do something with QrScanner
+</script>
 <script src="/js/qr-scanner.js"></script>
 <script src="/js/photo-capture.js"></script>
 

@@ -172,7 +172,6 @@ router.get('/scan', protect, guard, (req, res) => {
 // API: Verificar código QR
 router.post('/api/verify', protect, guard, async (req, res) => {
     try {
-        console.log("ya estoy en verify")
         const { visitId } = req.body;
 
         const today = new Date();

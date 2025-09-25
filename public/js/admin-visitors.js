@@ -14,7 +14,7 @@ class AdminVisitors {
         document.getElementById('search-term').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.applyFilters();
         });
-
+ƒ
         // Limpiar filtros
         document.getElementById('clear-filters').addEventListener('click', () => this.clearFilters());
     }
