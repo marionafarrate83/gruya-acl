@@ -393,5 +393,5 @@ class QRScanner {
 // Inicializar cuando el DOM esté listo
 document.addEventListener("DOMContentLoaded", () => {
   window.qrScanner = new QRScanner();
-  console.log("primero entra aqui");
+  //console.log("primero entra aqui");
 });
