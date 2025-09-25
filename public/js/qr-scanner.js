@@ -395,6 +395,9 @@ document.addEventListener("DOMContentLoaded", () => {
   //window.qrScanner = new QRScanner();
   try {
         window.qrScanner = new QRScanner();
+        //import QrScannerWorker from 'qr-scanner/qr-scanner-worker.min.js';
+        QrScanner.WORKER_PATH = QrScannerWorker;
+
     } catch (error) {
         console.error('Error inicializando QR Scanner:', error);
         
