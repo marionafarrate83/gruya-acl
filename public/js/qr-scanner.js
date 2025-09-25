@@ -392,6 +392,22 @@ class QRScanner {
 
 // Inicializar cuando el DOM esté listo
 document.addEventListener("DOMContentLoaded", () => {
-  window.qrScanner = new QRScanner();
-  //console.log("primero entra aqui");
+  //window.qrScanner = new QRScanner();
+  try {
+        window.qrScanner = new QRScanner();
+    } catch (error) {
+        console.error('Error inicializando QR Scanner:', error);
+        
+        // Mostrar interfaz de fallback
+        const scannerSection = document.querySelector('.scanner-section');
+        if (scannerSection) {
+            scannerSection.innerHTML = `
+                <div class="alert alert-warning">
+                    <h5><i class="fas fa-exclamation-triangle"></i> Escáner no disponible</h5>
+                    <p>Use la entrada manual below para verificar códigos QR.</p>
+                </div>
+            `;
+        }
+    }
+
 });
